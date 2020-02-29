@@ -1,4 +1,4 @@
-#include "Common/Utility/WordEngine.h"
+#include "WordEngine.h"
 //#include "qt_windows.h"
 WordEngine::WordEngine()
 {
@@ -27,7 +27,7 @@ WordEngine::~WordEngine()
  
 bool WordEngine::Open(QString sFile, bool bVisible)
 {
-     //ĞÂ½¨Ò»¸öwordÓ¦ÓÃ³ÌĞò
+     //æ–°å»ºä¸€ä¸ªwordåº”ç”¨ç¨‹åº
      m_pWord = new QAxObject();
      bool bFlag = m_pWord->setControl( "word.Application" );
      if(!bFlag)
@@ -35,15 +35,15 @@ bool WordEngine::Open(QString sFile, bool bVisible)
         return false;
      }
      m_pWord->setProperty("Visible", bVisible);
-     //»ñÈ¡ËùÓĞµÄ¹¤×÷ÎÄµµ
+     //è·å–æ‰€æœ‰çš„å·¥ä½œæ–‡æ¡£
      QAxObject *document = m_pWord->querySubObject("Documents");
      if(!document)
      {
         return false;
      }
-     //ÒÔÎÄ¼ştemplate.dotÎªÄ£°æĞÂ½¨Ò»¸öÎÄµµ
+     //ä»¥æ–‡ä»¶template.dotä¸ºæ¨¡ç‰ˆæ–°å»ºä¸€ä¸ªæ–‡æ¡£
      document->dynamicCall("Add(QString)", sFile);
-     //»ñÈ¡µ±Ç°¼¤»îµÄÎÄµµ
+     //è·å–å½“å‰æ¿€æ´»çš„æ–‡æ¡£
      m_pWorkDocument = m_pWord->querySubObject("ActiveDocument");
      if(m_pWorkDocument)
          m_bIsOpen = true;
@@ -74,9 +74,9 @@ void WordEngine::SaveAsPDF(QString sSavePath)
     if(m_bIsOpen && m_pWorkDocument)
     {
             QVariant OutputFileName(sSavePath);
-            QVariant ExportFormat(17);      //17ÊÇpdf
-            QVariant OpenAfterExport(false); //±£´æºóÊÇ·ñ×Ô¶¯´ò¿ª
-            //×ª³Épdf
+            QVariant ExportFormat(17);      //17æ˜¯pdf
+            QVariant OpenAfterExport(false); //ä¿å­˜åæ˜¯å¦è‡ªåŠ¨æ‰“å¼€
+            //è½¬æˆpdf
             m_pWorkDocument->querySubObject("ExportAsFixedFormat(const QVariant&,const QVariant&,const QVariant&)",
                 OutputFileName,
                 ExportFormat,
@@ -122,7 +122,7 @@ bool WordEngine::replaceText(QString sLabel,QString sText)
     if(!m_pWorkDocument){
         return false;
     }
-    //»ñÈ¡ÎÄµµÖĞÃû×ÖÎªsLabelµÄ±êÇ©
+    //è·å–æ–‡æ¡£ä¸­åå­—ä¸ºsLabelçš„æ ‡ç­¾
     QAxObject *pBookmark = m_pWorkDocument->querySubObject("Bookmarks(QString)",sLabel);
     if(pBookmark)
     {
@@ -183,7 +183,7 @@ QAxObject *WordEngine::insertTable(QString sLabel, int row, int column)
        //selection->dynamicCall("MoveDown(int)", 1);
        selection->dynamicCall("TypeParagraph(void)");
        selection->querySubObject("ParagraphFormat")->dynamicCall("Alignment", "wdAlignParagraphCenter");
-       //selection->dynamicCall("TypeText(QString&)", "Table Test");//ÉèÖÃ±êÌâ
+       //selection->dynamicCall("TypeText(QString&)", "Table Test");//è®¾ç½®æ ‡é¢˜
  
        QAxObject *range = selection->querySubObject("Range");
        QAxObject *tables = m_pWorkDocument->querySubObject("Tables");
@@ -216,19 +216,19 @@ QAxObject *WordEngine::insertTable(QString sLabel, int row, int column, QStringL
       selection->dynamicCall("InsertAfter(QString&)", "\r\n");
       //selection->dynamicCall("MoveLeft(int)", 1);
       selection->querySubObject("ParagraphFormat")->dynamicCall("Alignment", "wdAlignParagraphCenter");
-      //ÉèÖÃ±êÌâ
+      //è®¾ç½®æ ‡é¢˜
       //selection->dynamicCall("TypeText(QString&)", "Table Test");
  
       QAxObject *range = selection->querySubObject("Range");
       QAxObject *tables = m_pWorkDocument->querySubObject("Tables");
       QAxObject *table = tables->querySubObject("Add(QVariant,int,int)",range->asVariant(),row,column);
-      //±í¸ñ×Ô¶¯À­ÉìÁĞ 0¹Ì¶¨  1¸ù¾İÄÚÈİµ÷Õû  2 ¸ù¾İ´°¿Úµ÷Õû
+      //è¡¨æ ¼è‡ªåŠ¨æ‹‰ä¼¸åˆ— 0å›ºå®š  1æ ¹æ®å†…å®¹è°ƒæ•´  2 æ ¹æ®çª—å£è°ƒæ•´
       table->dynamicCall("AutoFitBehavior(WdAutoFitBehavior)", 2);
  
-      //ÉèÖÃ±íÍ·
+      //è®¾ç½®è¡¨å¤´
       for(int i=0;i<headList.size();i++){
           table->querySubObject("Cell(int,int)",1,i+1)->querySubObject("Range")->dynamicCall("SetText(QString)", headList.at(i));
-          //¼Ó´Ö
+          //åŠ ç²—
           table->querySubObject("Cell(int,int)",1,i+1)->querySubObject("Range")->dynamicCall("SetBold(int)", true);
       }
  
@@ -262,7 +262,7 @@ void WordEngine::SetTableCellString(QAxObject *table, int row,int column,QString
         return ;
     cell->dynamicCall("Select(void)");
     cell->querySubObject("Range")->setProperty("Text", text);
-    //cell->querySubObject("Range")->setProperty("BgColor", QColor(0, 255, 0));   //ÉèÖÃµ¥Ôª¸ñ±³¾°É«£¨ÂÌÉ«£©
+    //cell->querySubObject("Range")->setProperty("BgColor", QColor(0, 255, 0));   //è®¾ç½®å•å…ƒæ ¼èƒŒæ™¯è‰²ï¼ˆç»¿è‰²ï¼‰
 
 }
 
